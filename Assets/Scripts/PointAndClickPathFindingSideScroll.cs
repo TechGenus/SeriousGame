@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PointAndClickPathFinding : MonoBehaviour {
+public class PointAndClickPathFindingSideScroll : MonoBehaviour {
 
 	private Animator myAnimator;
 	private bool myWalkingRight;
