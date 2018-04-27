@@ -9,6 +9,8 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 	private LayerMask layerMask;
 	private Transform t;
 	private bool destinationInitalzied;
+	private bool interactable;
+	private string interactableObjName;
 	private Vector3 destination;
 	private Vector3 direction;
 	private Vector3 distance;
@@ -67,6 +69,13 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
                 destinationInitalzied = false;
                 pbAnim.SetBool("walking", false);
 				waypoint.SetActive(false);
+
+				if (interactable) {
+					//put switch later probably
+					if (interactableObjName.Equals ("Door to Scene1")) {
+						FadeManager.Instance.Fade (true, 1.5f, 1);
+					}
+				}
             }
 		}
 	}
@@ -124,9 +133,18 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 	{
 		if (Physics.Raycast(ray, out hit, 100, layerMask))
 		{
-			destination = hit.point;
+			if (hit.collider.tag == "Interactable") {
+				interactable = true;
+				interactableObjName = hit.collider.name;
+
+				destination = hit.collider.transform.GetChild (0).GetComponent<Transform> ().position;
+				distance = destination - t.position;
+			} else {
+				destination = hit.point;
+				distance = hit.point - t.position;
+			}
+
 			destinationInitalzied = true;
-			distance = hit.point - t.position;
 			float directionX = distance.x / Mathf.Abs(distance.x);
 			float directionY = distance.y / Mathf.Abs(distance.y);
 			direction = new Vector3(directionX,	directionY);
