@@ -16,8 +16,11 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 	public float speed;
 	public float marginOfError;
 
-    public GameObject playerBody;
+	public GameObject playerBody;
     private Animator pbAnim;
+
+	public GameObject waypoint;
+	private Transform waypointT;
 
     // Use this for initialization
     void Start () {
@@ -26,6 +29,8 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 		layerMask = ~layerMask;
 		destinationInitalzied = false;
         pbAnim = playerBody.GetComponent<Animator>();
+
+		waypointT = waypoint.GetComponent<Transform>();
 	}
 	
 	// Update is called once per frame
@@ -42,7 +47,6 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 
 			float currAbsDistanceX = Mathf.Abs(t.position.x - destination.x);
 			float currAbsDistanceY = Mathf.Abs(t.position.y - destination.y);
-
 
             if (currAbsDistanceX > marginOfError || currAbsDistanceY > marginOfError)
             {
@@ -62,6 +66,7 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
                 // reached pos
                 destinationInitalzied = false;
                 pbAnim.SetBool("walking", false);
+				waypoint.SetActive(false);
             }
 		}
 	}
@@ -125,6 +130,9 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 			float directionX = distance.x / Mathf.Abs(distance.x);
 			float directionY = distance.y / Mathf.Abs(distance.y);
 			direction = new Vector3(directionX,	directionY);
+
+			waypoint.SetActive(true);
+			waypointT.position = destination + new Vector3(0, 0.1f, -1f);
 		}
 	}
 }
