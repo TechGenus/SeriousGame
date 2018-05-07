@@ -27,7 +27,7 @@ public class FadeManager : MonoBehaviour {
 	}
 
 	private void Update() {
-		print (isInTransition);
+		// print (isInTransition);
 		if (!isInTransition) {
 			return;
 		}
@@ -43,6 +43,6 @@ public class FadeManager : MonoBehaviour {
 	}
 
 	void ChangeScene () {
-		SceneManager.LoadScene (this.build);
+		SceneManager.LoadScene ("Scene1");
 	}
 }

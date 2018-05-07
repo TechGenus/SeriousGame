@@ -22,6 +22,7 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
     private Animator pbAnim;
 
 	public GameObject waypoint;
+	public Vector3 waypointOffset;
 	private Transform waypointT;
 
     // Use this for initialization
@@ -42,6 +43,12 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0))
 			findDirectionAndDestination();
 
+		walkToDestination();
+		
+	}
+
+	private void walkToDestination()
+	{
 		if (destinationInitalzied)
 		{
 			float absDistanceX = Mathf.Abs(distance.x);
@@ -50,37 +57,39 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 			float currAbsDistanceX = Mathf.Abs(t.position.x - destination.x);
 			float currAbsDistanceY = Mathf.Abs(t.position.y - destination.y);
 
-            if (currAbsDistanceX > marginOfError || currAbsDistanceY > marginOfError)
-            {
-                // going to pos
-                float totalAbsDistance = (absDistanceX + absDistanceY);
-                float distanceXPercentage = absDistanceX / totalAbsDistance;
-                float distanceYPercentage = absDistanceY / totalAbsDistance;
-                float translateX = speed * distanceXPercentage * direction.x * Time.deltaTime;
-                float translateY = speed * distanceYPercentage * direction.y * Time.deltaTime;
+			if (currAbsDistanceX > marginOfError || currAbsDistanceY > marginOfError)
+			{
+				// going to pos
+				float totalAbsDistance = (absDistanceX + absDistanceY);
+				float distanceXPercentage = absDistanceX / totalAbsDistance;
+				float distanceYPercentage = absDistanceY / totalAbsDistance;
+				float translateX = speed * distanceXPercentage * direction.x * Time.deltaTime;
+				float translateY = speed * distanceYPercentage * direction.y * Time.deltaTime;
 
-                setAnimation(distanceYPercentage, distanceXPercentage);
+				startWalking(distanceYPercentage, distanceXPercentage);
 
-                t.Translate(translateX, translateY, 0);
-            }
-            else
-            {
-                // reached pos
-                destinationInitalzied = false;
-                pbAnim.SetBool("walking", false);
+				t.Translate(translateX, translateY, 0);
+			}
+			else
+			{
+				// reached pos
+				destinationInitalzied = false;
+				pbAnim.SetBool("walking", false);
 				waypoint.SetActive(false);
 
-				if (interactable) {
+				if (interactable)
+				{
 					//put switch later probably
-					if (interactableObjName.Equals ("Door to Scene1")) {
-						FadeManager.Instance.Fade (true, 1.5f, 1);
+					if (interactableObjName.Equals("Door to Scene1"))
+					{
+						FadeManager.Instance.Fade(true, 1.5f, 1);
 					}
 				}
-            }
+			}
 		}
 	}
 
-    private void setAnimation(float distanceYPercentage, float distanceXPercentage)
+    private void startWalking(float distanceYPercentage, float distanceXPercentage)
     {
         if (distanceYPercentage >= distanceXPercentage)
         {
@@ -92,7 +101,6 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
                     pbAnim.SetBool("wasIdleLeft", true);
                     pbAnim.SetBool("wasIdleRight", false);
                 }
-                    
                 else
                 {
                     pbAnim.SetBool("wasIdleLeft", false);
@@ -107,7 +115,6 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
                     pbAnim.SetBool("wasIdleLeft", true);
                     pbAnim.SetBool("wasIdleRight", false);
                 }
-
                 else
                 {
                     pbAnim.SetBool("wasIdleLeft", false);
@@ -118,13 +125,9 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
         else
         {
             if (direction.x <= 0)
-            {
                 pbAnim.SetInteger("playerState", 4);
-            }
             else if (direction.x > 0)
-            {
                 pbAnim.SetInteger("playerState", 6);
-            }
         }
         pbAnim.SetBool("walking", true);
     }
@@ -141,7 +144,7 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 				distance = destination - t.position;
 			} else {
 				destination = hit.point;
-				distance = hit.point - t.position;
+				distance = destination - t.position;
 			}
 
 			destinationInitalzied = true;
@@ -150,7 +153,7 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 			direction = new Vector3(directionX,	directionY);
 
 			waypoint.SetActive(true);
-			waypointT.position = destination + new Vector3(0, 0.1f, -1f);
+			waypointT.position = destination + waypointOffset;
 		}
 	}
 }
