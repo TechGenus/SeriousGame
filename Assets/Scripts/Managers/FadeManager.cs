@@ -13,17 +13,19 @@ public class FadeManager : MonoBehaviour {
 	private int build;
 	public bool isShowing;
 	private float duration;
+	private string sceneName;
 
 	private void Awake () {
 		Instance = this;
 	}
 
-	public void Fade (bool showing, float duration, int build) {
+	public void Fade (bool showing, float duration, int build, string aSceneName) {
 		isShowing = showing;
 		isInTransition = true;
 		this.duration = duration;
 		this.build = build;
 		transition = (isShowing) ? 0 : 1;
+		this.sceneName = aSceneName;
 	}
 
 	private void Update() {
@@ -38,11 +40,11 @@ public class FadeManager : MonoBehaviour {
 		if (transition > 1 || transition < 0) {
 			// fade is done now load new scene
 			isInTransition = false;
-			ChangeScene ();
+			ChangeScene (sceneName);
 		}
 	}
 
-	void ChangeScene () {
-		SceneManager.LoadScene ("Scene1");
+	void ChangeScene (string sceneName) {
+		SceneManager.LoadScene (sceneName);
 	}
 }

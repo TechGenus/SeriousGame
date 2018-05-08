@@ -9,8 +9,6 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 	private LayerMask layerMask;
 	private Transform t;
 	private bool destinationInitalzied;
-	private bool interactable;
-	private string interactableObjName;
 	private Vector3 destination;
 	private Vector3 direction;
 	private Vector3 distance;
@@ -43,53 +41,42 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0))
 			findDirectionAndDestination();
 
-		walkToDestination();
-		
+		if (destinationInitalzied)
+			walkToDestination();
 	}
 
 	private void walkToDestination()
 	{
-		if (destinationInitalzied)
+		float absDistanceX = Mathf.Abs(distance.x);
+		float absDistanceY = Mathf.Abs(distance.y);
+
+		float currAbsDistanceX = Mathf.Abs(t.position.x - destination.x);
+		float currAbsDistanceY = Mathf.Abs(t.position.y - destination.y);
+
+		if (currAbsDistanceX > marginOfError || currAbsDistanceY > marginOfError)
 		{
-			float absDistanceX = Mathf.Abs(distance.x);
-			float absDistanceY = Mathf.Abs(distance.y);
+			// calculating percentage and distance that should be traveled
+			float totalAbsDistance = (absDistanceX + absDistanceY);
+			float distanceXPercentage = absDistanceX / totalAbsDistance;
+			float distanceYPercentage = absDistanceY / totalAbsDistance;
+			float translateX = speed * distanceXPercentage * direction.x * Time.deltaTime;
+			float translateY = speed * distanceYPercentage * direction.y * Time.deltaTime;
 
-			float currAbsDistanceX = Mathf.Abs(t.position.x - destination.x);
-			float currAbsDistanceY = Mathf.Abs(t.position.y - destination.y);
-
-			if (currAbsDistanceX > marginOfError || currAbsDistanceY > marginOfError)
-			{
-				// going to pos
-				float totalAbsDistance = (absDistanceX + absDistanceY);
-				float distanceXPercentage = absDistanceX / totalAbsDistance;
-				float distanceYPercentage = absDistanceY / totalAbsDistance;
-				float translateX = speed * distanceXPercentage * direction.x * Time.deltaTime;
-				float translateY = speed * distanceYPercentage * direction.y * Time.deltaTime;
-
-				startWalking(distanceYPercentage, distanceXPercentage);
-
-				t.Translate(translateX, translateY, 0);
-			}
-			else
-			{
-				// reached pos
-				destinationInitalzied = false;
-				pbAnim.SetBool("walking", false);
-				waypoint.SetActive(false);
-
-				if (interactable)
-				{
-					//put switch later probably
-					if (interactableObjName.Equals("Door to Scene1"))
-					{
-						FadeManager.Instance.Fade(true, 1.5f, 1);
-					}
-				}
-			}
+			// start walking
+			startWalkingAnimation(distanceYPercentage, distanceXPercentage);
+			t.Translate(translateX, translateY, 0);
+		}
+		else
+		{
+			// reached pos
+			destinationInitalzied = false;
+			pbAnim.SetBool("walking", false);
+			waypoint.SetActive(false);
+			hit.collider.isTrigger = false;
 		}
 	}
 
-    private void startWalking(float distanceYPercentage, float distanceXPercentage)
+    private void startWalkingAnimation(float distanceYPercentage, float distanceXPercentage)
     {
         if (distanceYPercentage >= distanceXPercentage)
         {
@@ -136,24 +123,51 @@ public class PointAndClickPathFindingMI : MonoBehaviour {
 	{
 		if (Physics.Raycast(ray, out hit, 100, layerMask))
 		{
-			if (hit.collider.tag == "Interactable") {
-				interactable = true;
-				interactableObjName = hit.collider.name;
-
+			if (hit.collider.tag == "Interactable")
+			{
 				destination = hit.collider.transform.GetChild (0).GetComponent<Transform> ().position;
+				hit.collider.isTrigger = true;
 				distance = destination - t.position;
-			} else {
+			}
+			else
+			{
 				destination = hit.point;
 				distance = destination - t.position;
 			}
 
-			destinationInitalzied = true;
 			float directionX = distance.x / Mathf.Abs(distance.x);
 			float directionY = distance.y / Mathf.Abs(distance.y);
-			direction = new Vector3(directionX,	directionY);
+			direction = new Vector3(directionX, directionY);
+			//checkObstacle();
 
-			waypoint.SetActive(true);
-			waypointT.position = destination + waypointOffset;
+			destinationInitalzied = true;
+
+			setWaypoint();
 		}
+	}
+
+	private void checkObstacle() // Todo: figure out a way to loop walking cycles
+	{
+		RaycastHit2D hit2 = Physics2D.Raycast(t.position, direction, distance.magnitude);
+		if (hit2.collider.tag == "obstacle")
+		{
+			int nodeCount = hit2.transform.childCount;
+
+			Vector3 minDistance = hit2.transform.GetChild(0).GetComponent<Transform>().position - t.position;
+			for (int i = 1; i < nodeCount; i++)
+			{
+				Vector3 tmpDistance = hit2.transform.GetChild(i).GetComponent<Transform>().position - t.position;
+				if (minDistance.magnitude > tmpDistance.magnitude)
+				{
+					minDistance = tmpDistance;
+				}
+			}
+		}
+	}
+
+	private void setWaypoint()
+	{
+		waypoint.SetActive(true);
+		waypointT.position = destination + waypointOffset;
 	}
 }
