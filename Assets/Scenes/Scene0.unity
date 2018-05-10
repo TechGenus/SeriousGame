@@ -1229,3 +1229,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 076885e3d8a301d4e8545085c0dab72c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nextScene: Scene1
